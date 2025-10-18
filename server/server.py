@@ -24,11 +24,7 @@ def handle_client(c):
     with c:
         print('Connected by', addr)
 
-        pg_password = ""
-        with open("../secrets/pg_password.txt", "r") as file:
-            pg_password = file.read()
 
-        conn_pg = psycopg2.connect(f"dbname=banco_popular user=postgres password={pg_password} host=localhost")
 
         # Open cursor to perform ops
         cur = conn_pg.cursor()
@@ -136,29 +132,39 @@ def handle_client(c):
 
         # Close comms with db
         cur.close()
-        conn_pg.close()
 
 
 #Establecimiento de cipher suites
 
-# context = ssl.create_default_context()
+context = ssl.create_default_context()
 
 # cipher = 'DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:ECDHE-ECDSA-AES128-GCM-SHA256'
 # context.set_ciphers(cipher)
 
+context.minimum_version = ssl.TLSVersion.TLSv1_3
+
 
 # Crear y envolver el socket con SSL
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-ssl_context.load_cert_chain(certfile=certfile, keyfile=keyfile)
+# ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+# ssl_context.load_cert_chain(certfile=certfile, keyfile=keyfile)
+context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+context.load_cert_chain(certfile=certfile, keyfile=keyfile)
 
-with ssl_context.wrap_socket(server_socket, server_side=True) as s:
+with context.wrap_socket(server_socket, server_side=True) as s:
+    pg_password = ""
+    with open("../secrets/pg_password.txt", "r") as file:
+        pg_password = file.read()
+    conn_pg = psycopg2.connect(f"dbname=banco_popular user=postgres password={pg_password} host=localhost")
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((HOST, PORT_HOST))
-    s.listen(5)
+    s.listen()
 
-    while True:
-            conn, addr = s.accept()
-            start_new_thread(handle_client, (conn,))
-            # s.close()
+
+    with conn_pg:
+        while True:
+                conn, addr = s.accept()
+                start_new_thread(handle_client, (conn,))
+                # s.close()
+
 
