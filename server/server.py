@@ -155,7 +155,7 @@ with context.wrap_socket(server_socket, server_side=True) as s:
     pg_password = ""
     with open("../secrets/pg_password.txt", "r") as file:
         pg_password = file.read()
-    conn_pg = psycopg2.connect(f"dbname=banco_popular user=postgres password={pg_password} host=localhost")
+    conn_pg = psycopg2.connect(f"dbname=mensajes user=postgres password={pg_password} host=localhost")
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((HOST, PORT_HOST))
     s.listen()

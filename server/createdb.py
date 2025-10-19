@@ -4,7 +4,7 @@ import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from psycopg2 import errors
 
-DB_NAME = "banco_popular"
+DB_NAME = "mensajes"
 
 def get_connection(database):
     with open("../secrets/pg_password.txt", "r") as file:
