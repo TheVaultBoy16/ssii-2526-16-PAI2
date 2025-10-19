@@ -6,6 +6,8 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 import hashlib, hmac, random
 
+from datetime import date
+
 HOST = ''
 PORT_HOST = 8000
 
@@ -107,6 +109,8 @@ def handle_client(c):
                 try:
                     send_message(c,'log',f"No hubo problemas en la integridad del mensaje :)\n Enviando mensaje a {dest} \n")
                     cur.execute("UPDATE users SET messages_sent = messages_sent + 1 WHERE username = %s;", (user_name,))
+                    msg_date = date.today()
+                    cur.execute("UPDATE users SET last_message_date = %s WHERE username = %s;", (msg_date,user_name))
                     #cur.execute("INSERT INTO transfers (origin,destination,amount) VALUES (%s,%s,%s);", (co, cd, ct))
                     # print("->",nonce)
                     # print(len(nonce))
@@ -155,7 +159,7 @@ with context.wrap_socket(server_socket, server_side=True) as s:
     pg_password = ""
     with open("../secrets/pg_password.txt", "r") as file:
         pg_password = file.read()
-    conn_pg = psycopg2.connect(f"dbname=banco_popular user=postgres password={pg_password} host=localhost")
+    conn_pg = psycopg2.connect(f"dbname=mensajes user=postgres password={pg_password} host=localhost")
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((HOST, PORT_HOST))
     s.listen()

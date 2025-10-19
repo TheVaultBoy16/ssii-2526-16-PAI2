@@ -4,7 +4,7 @@ import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from psycopg2 import errors
 
-DB_NAME = "banco_popular"
+DB_NAME = "mensajes"
 
 def get_connection(database):
     with open("../secrets/pg_password.txt", "r") as file:
@@ -32,7 +32,7 @@ conn.close()
 new_conn = get_connection(DB_NAME)
 new_cur = new_conn.cursor()
     
-new_cur.execute('CREATE TABLE IF NOT EXISTS users (username varchar(12) PRIMARY KEY, password varchar(64) NOT NULL, messages_sent INT NOT NULL);')
+new_cur.execute('CREATE TABLE IF NOT EXISTS users (username varchar(12) PRIMARY KEY, password varchar(64) NOT NULL, messages_sent INT NOT NULL, last_message_date DATE DEFAULT CURRENT_DATE);')
 # new_cur.execute('CREATE TABLE IF NOT EXISTS messages (destination varchar(12) NOT NULL, content character(24) NOT NULL);')
 new_cur.execute('CREATE TABLE IF NOT EXISTS nonces (nonce varchar(32) PRIMARY KEY);')
 new_conn.commit()
