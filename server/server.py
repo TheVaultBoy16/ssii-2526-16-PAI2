@@ -49,10 +49,6 @@ def handle_client(c):
             print(hashpw.hexdigest())
             cur.execute("INSERT INTO users (username, password,messages_sent) VALUES (%s,%s,0);", (user_name,hashpw.hexdigest()))
             conn_pg.commit()
-            # send_message(c,'info',"Usuario registrado correctamente \n")
-            # print ("jj")
-            # empty = c.recv(1024).decode()
-            # print("->",empty)
         else:
             send_message(c,'inp',f"Usuario ya registrado, {user_data_query[0]}\n Introduzca su contraseña: \n")
             print(user_data_query[1])
@@ -103,7 +99,7 @@ def handle_client(c):
             ms,mac_cliente = res.split(';')
             print(ms,mac_cliente)
 
-            expected =  hmac.new(KEY.encode(), dest.encode()+b","+ms.encode(), hashlib.sha256).digest() # El nonce va con el mensaje concatenado o aparte?
+            expected =  hmac.new(KEY.encode(), dest.encode()+b","+ms.encode(), hashlib.sha256).digest()
             print(expected)
             if (hmac.compare_digest(expected,bytes.fromhex(mac_cliente))):
                 try:
@@ -111,10 +107,6 @@ def handle_client(c):
                     cur.execute("UPDATE users SET messages_sent = messages_sent + 1 WHERE username = %s;", (user_name,))
                     msg_date = date.today()
                     cur.execute("UPDATE users SET last_message_date = %s WHERE username = %s;", (msg_date,user_name))
-                    #cur.execute("INSERT INTO transfers (origin,destination,amount) VALUES (%s,%s,%s);", (co, cd, ct))
-                    # print("->",nonce)
-                    # print(len(nonce))
-                    # cur.execute("INSERT INTO nonces (nonce) VALUES (%s);", (nonce,))
                 except:
                     send_message(c,'inp',f"Datos erróneos en \n")
                     conn_pg.rollback()
