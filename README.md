@@ -35,6 +35,8 @@ El directorio `secrets`, que se ignora en el control de versiones de `git` y deb
 - Crear la carpeta `secrets`, si no existiera. Luego, en ella, generar `key.txt` y `pg_password.txt`, que contienen la clave para la ejecución de la operación HMAC y la contraseña para la base de datos, respectivamente.
 Alternativamente, usar el script proporcionado llamado `init_secrests.sh`, pudiéndole pasar como argumentos los contenidos de los dos archivos mencionados anteriormente, en el mismo orden.
 - Ejecutar `$ docker compose up` para levantar la base de datos postgresql.
+- Ejecutar `create_key_crt.sh` para generar la clave privada del servidor y un certificado que lo autofirme.
+- A la hora de rellenar los campos tras la ejecución del script anterior es importante rellenar el campo Common Name con 'localhost' pues este se refiere al nombre del servidor. El resto de campos es indiferente.
 - Ejecutar el script createdb.py `$ python3 createdb.py` para inicializar la base de datos.
 - Ejecutar el script `$ python3 server.py` para levantar el servidor.
 
