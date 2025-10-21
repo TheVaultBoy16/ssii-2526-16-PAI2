@@ -54,7 +54,7 @@ with context.wrap_socket(client_socket, server_hostname=HOST) as s:
             elif mode=="mss":
                 ms = input("Mensaje: \n")
                 mac_client = hmac.new(KEY.encode(), dest.encode()+b","+ms.encode(), hashlib.sha256).digest()
-                print(ms,mac_client)
+                #print(ms,mac_client)
                 msg = f"{ms};{mac_client.hex()}"
                 try:
                     s.sendall(msg.encode())
