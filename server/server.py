@@ -1,5 +1,8 @@
 import socket, ssl
 import threading
+import pyotp
+import qrcode
+from otp_qr_and_key import *
 from _thread import start_new_thread
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
@@ -10,6 +13,7 @@ from datetime import date
 
 HOST = ''
 PORT_HOST = 8000
+
 
 certfile = '../secrets/server.crt'  # Ruta al archivo del certificado SSL
 keyfile = '../secrets/server.key'    # Ruta al archivo de la clave privada
@@ -62,6 +66,30 @@ def handle_client(c):
                 if n==5:
                     send_message(c,'log',f"Contraseña errónea.\n Ha superado el máximo número de intentos para introducir la contraseña...")
                     c.close()
+            else:
+                 send_message(c,'inp',"Quiere registrar este dispositivo en el doble factor?\n")
+                 dec_2 = c.recv(1024).decode()
+                 if (dec_2 == 0):
+                    user_key = generate_otp_key()
+                    print("Your Two-Factor Authentication Key:", user_key)
+                    with open('2fa.txt', 'w') as f:
+                        f.write(user_key)
+                    generate_qr_code(user_key, 'ST-16', 'CodingFleet.com')
+                 totp = pyotp.TOTP(key)
+                 send_message(c,'inp',"Introduzca su clave de doble factor (OTP)\n")
+                 otp_input = c.recv(1024).decode()
+                 if (totp.verify(otp_input) == False):
+                    n = 0
+                    while n!=5 and  totp.verify(otp_input) == False:
+                        send_message(c,'inp',f"OTP erróneo, inténtelo de nuevo\n")
+                        passw = c.recv(1024).decode()
+                        n+=1
+                    if n==5:
+                        send_message(c,'log',f"OTP erróneo.\n Ha superado el máximo número de intentos para introducir la contraseña...")
+                        c.close()
+                    
+
+                 
 
         send_message(c,'inp',f"Bienvenido al sistema {user_name}\n Si quiere ecribir un mensaje escriba 'msg' y si quiere desloguarse escriba 'exit'\n")
         dec = c.recv(1024).decode().strip()
